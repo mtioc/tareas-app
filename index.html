@@ -778,6 +778,132 @@ body {
   75% { transform: translateX(-2px); }
 }
 .shake { animation: shake 0.4s ease; }
+
+/* KAIRO */
+#kairo {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 500;
+  cursor: pointer;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 0 8px rgba(0,245,255,0.4));
+}
+#kairo:hover { transform: scale(1.1); }
+#kairoBubble {
+  position: absolute;
+  bottom: 90px;
+  right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px 8px 0 8px;
+  padding: 8px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--cyan);
+  max-width: 200px;
+  min-width: 120px;
+  display: none;
+  animation: bubbleIn 0.2s ease;
+  line-height: 1.5;
+  box-shadow: 0 0 12px rgba(0,245,255,0.2);
+}
+@keyframes bubbleIn { from { opacity:0; transform:scale(0.8) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+#kairoBubble.visible { display: block; }
+
+/* wellness popup */
+#wellnessPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#wellnessInner {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  box-shadow: var(--glow2);
+  padding: 24px 32px;
+  text-align: center;
+  min-width: 260px;
+  animation: popIn 0.2s ease;
+  position: relative;
+}
+#wellnessInner::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+}
+#wellnessMsg { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text); margin-top:10px; line-height:1.7; }
+
+/* calendar */
+#calPanel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#calInner {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  box-shadow: var(--glow2);
+  padding: 24px;
+  width: 700px;
+  max-width: 96vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: popIn 0.2s ease;
+}
+#calGrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.cal-day {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px;
+  min-height: 100px;
+  border-radius: 2px;
+  transition: border-color 0.15s;
+}
+.cal-day.today { border-color: var(--cyan); box-shadow: var(--glow); }
+.cal-day-header { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:0.1em; margin-bottom:6px; }
+.cal-day-num { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:var(--text2); margin-bottom:6px; }
+.cal-day.today .cal-day-num { color:var(--cyan); text-shadow:var(--glow); }
+.cal-task-dot { font-size:9px; font-family:'Share Tech Mono',monospace; padding:2px 4px; margin-bottom:2px; border-radius:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* sticky */
+#stickyPanel {
+  position: fixed;
+  bottom: 100px;
+  right: 90px;
+  z-index: 600;
+  animation: popIn 0.2s ease;
+}
+#stickyInner {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  box-shadow: var(--glow2);
+  padding: 16px;
+  width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.sticky-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Share Tech Mono',monospace;
+  font-size: 11px;
+  color: var(--text2);
+}
+.sticky-del { color:var(--text3); cursor:pointer; flex-shrink:0; font-size:14px; padding:0 2px; }
+.sticky-del:hover { color:var(--red); }
 </style>
 </head>
 <body>
@@ -859,6 +985,23 @@ body {
     </div>
 
     <button class="add-btn-side" onclick="openModal()">+ NUEVA TAREA</button>
+    <button class="add-btn-side" style="margin-top:6px" onclick="openCalendar()">◫ SEMANA</button>
+    <button class="add-btn-side" style="margin-top:6px" onclick="openSticky()">✎ NOTAS</button>
+    <button class="add-btn-side" style="margin-top:6px" onclick="openWellnessConfig()">⚕ BIENESTAR</button>
+    <div id="xpBar" style="margin:10px 10px 0;padding:8px 10px;background:var(--surface);border:1px solid var(--border)">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.15em;margin-bottom:4px">// XP DEL DÍA</div>
+      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+        <div id="xpFill" style="height:100%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);transition:width 0.4s;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <span id="xpLabel" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan2)">LVL 1</span>
+        <span id="xpCount" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)">0 XP</span>
+      </div>
+    </div>
+    <div id="streakBox" style="margin:6px 10px 0;padding:8px 10px;background:var(--surface);border:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);display:flex;align-items:center;gap:6px">
+      <span id="streakFire" style="font-size:14px">🔥</span>
+      <span id="streakLabel">0 días racha</span>
+    </div>
   </div>
 
   <!-- main -->
@@ -926,6 +1069,50 @@ body {
 </div>
 
 <div class="toast-area" id="toastArea"></div>
+
+<!-- KAIRO CHARACTER -->
+<div id="kairo" onclick="kairoClick()" title="KAIRO">
+  <canvas id="kairoCanvas" width="64" height="80"></canvas>
+  <div id="kairoBubble"></div>
+</div>
+
+<!-- WELLNESS POPUP -->
+<div id="wellnessPopup" style="display:none">
+  <div id="wellnessInner">
+    <canvas id="wellnessKairo" width="48" height="60"></canvas>
+    <div id="wellnessMsg"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+      <button class="cyber-btn" id="wellnessConfirm" onclick="confirmWellness()">✓ LISTO</button>
+      <button class="cyber-btn" onclick="snoozeWellness()">+ 10 MIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY CALENDAR PANEL -->
+<div id="calPanel" style="display:none">
+  <div id="calInner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-title" style="margin:0">// SEMANA</div>
+      <button class="cyber-btn" onclick="document.getElementById('calPanel').style.display='none'">✕ CERRAR</button>
+    </div>
+    <div id="calGrid"></div>
+  </div>
+</div>
+
+<!-- STICKY NOTES PANEL -->
+<div id="stickyPanel" style="display:none">
+  <div id="stickyInner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="modal-title" style="margin:0">// NOTAS RÁPIDAS</div>
+      <button class="cyber-btn" onclick="document.getElementById('stickyPanel').style.display='none'">✕</button>
+    </div>
+    <div id="stickyList"></div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <input type="text" id="stickyInput" placeholder="nueva nota..." style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;outline:none" onkeydown="if(event.key==='Enter')addSticky()">
+      <button class="cyber-btn" onclick="addSticky()">ADD</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const STORAGE = 'tareas-cyber-v1';
@@ -1258,7 +1445,11 @@ function toggleDone(e, id) {
   const t = tasks.find(x=>x.id===id);
   if (!t) return;
   t.done = !t.done;
-  if (t.done) triggerShake();
+  if (t.done) {
+    triggerShake(); playComplete(); addXP(20);
+    const phrases = KAIRO_PHRASES.happy;
+    setTimeout(() => kairoSay(phrases[Math.floor(Math.random()*phrases.length)], 'happy'), 300);
+  }
   saveTasks(); render();
   toast(t.done?'// COMPLETADA':'// REABIERTA', t.title);
 }
@@ -1431,8 +1622,333 @@ function triggerShake() {
   setTimeout(() => document.body.classList.remove('shake'), 400);
 }
 
-// keyboard
-document.addEventListener('keydown', e => {
+// ── AUDIO (synthwave) ──
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function playComplete() {
+  try {
+    const ctx = getAudio();
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.1;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.15, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      o.start(t); o.stop(t + 0.25);
+    });
+  } catch(e) {}
+}
+function playNotif() {
+  try {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'square'; o.frequency.value = 440;
+    o.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o.start(); o.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+}
+
+// ── XP & STREAK ──
+function getXPData() {
+  try { return JSON.parse(localStorage.getItem('kairo-xp')) || { xp:0, level:1, streak:0, lastDate:'' }; } catch(e) { return { xp:0, level:1, streak:0, lastDate:'' }; }
+}
+function saveXPData(d) { localStorage.setItem('kairo-xp', JSON.stringify(d)); }
+function addXP(amount) {
+  const d = getXPData();
+  d.xp += amount;
+  const newLevel = Math.floor(d.xp / 100) + 1;
+  if (newLevel > d.level) { d.level = newLevel; toast(`// LEVEL UP! LVL ${newLevel}`, `+${amount} XP`, 'var(--magenta)'); playComplete(); kairoSay(`¡LEVEL ${newLevel}! Eres imparable.`, 'happy'); }
+  saveXPData(d); updateXPBar();
+}
+function checkStreak() {
+  const d = getXPData();
+  const today = todayStr();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yest = yesterday.toISOString().split('T')[0];
+  if (d.lastDate === today) return;
+  if (d.lastDate === yest) d.streak++;
+  else if (d.lastDate !== today) d.streak = 1;
+  d.lastDate = today;
+  saveXPData(d); updateXPBar();
+}
+function updateXPBar() {
+  const d = getXPData();
+  const pct = (d.xp % 100);
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpLabel').textContent = `LVL ${d.level}`;
+  document.getElementById('xpCount').textContent = `${d.xp} XP`;
+  document.getElementById('streakLabel').textContent = `${d.streak} día${d.streak!==1?'s':''} racha`;
+  document.getElementById('streakFire').textContent = d.streak >= 3 ? '🔥' : d.streak >= 1 ? '✦' : '○';
+}
+
+// ── KAIRO CHARACTER ──
+const KAIRO_MOODS = { normal:'normal', happy:'happy', angry:'angry', water:'water', stretch:'stretch' };
+let kairoMood = 'normal';
+let kairoBubbleTimeout = null;
+
+const KAIRO_PHRASES = {
+  normal: ['Sistema operativo.','Monitoreando tareas...','Todo bajo control.','Listo para trabajar.','En espera de órdenes.'],
+  happy: ['¡Excelente trabajo!','Eso es lo que quería ver.','¡Sigue así, operador!','Rendimiento óptimo.','¡NIVEL MÁXIMO DESBLOQUEADO!'],
+  angry: ['Hay tareas vencidas...','Necesito tu atención.','El sistema falla si no actúas.','Esto no puede seguir así.','¡ALERTA ROJA en el sistema!'],
+  water: ['Hidratación requerida.','Tu cuerpo necesita agua.','H₂O detectado: insuficiente.','Bebe agua. Ahora.','Sistema deshidratado. Recarga.'],
+  stretch: ['Tiempo de elongar.','Levántate. El cuerpo lo pide.','Pausa activa requerida.','30 segundos. Estira los brazos.','Tu columna agradecerá esto.']
+};
+
+function drawKairo(canvasId, mood, size) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const s = size || 1;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const px = (x, y, c, bw, bh) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(x*s, y*s, (bw||1)*s, (bh||1)*s);
+  };
+
+  // hair (white/silver)
+  const hair = '#e8f4f8';
+  [[2,1,4],[1,2,1],[6,2,1],[1,3,1],[6,3,1]].forEach(([x,y,w])=>px(x,y,hair,w));
+  // spiky top hair
+  px(3,0,hair,3,1); px(2,1,hair,5,1);
+
+  // face
+  const skin = '#f0d8c0';
+  px(2,3,skin,5,4);
+
+  // eyes — cyan glow
+  const eyeColor = mood==='angry' ? '#ff3355' : mood==='happy' ? '#00ff88' : '#00f5ff';
+  px(3,4,eyeColor,1,1); px(5,4,eyeColor,1,1);
+  // eye shine
+  if (mood !== 'angry') { ctx.fillStyle='#ffffff'; ctx.fillRect(3*s, 4*s, 2, 2); ctx.fillRect(5*s, 4*s, 2, 2); }
+
+  // mouth
+  if (mood==='happy') { px(3,6,'#ff6688',3,1); px(4,6,'#ff8899',1,1); }
+  else if (mood==='angry') { px(3,6,'#cc2244',3,1); px(3,7,'#ff3355',1); px(5,7,'#ff3355',1); }
+  else if (mood==='water') { px(4,6,'#00c8d4',1,1); px(3,6,'#6a9aaa',1); px(5,6,'#6a9aaa',1); }
+  else { px(3,6,'#c89090',3,1); }
+
+  // neck
+  px(4,7,skin,1,1);
+
+  // body — jacket
+  const jacket = '#0a1520';
+  const accent = mood==='angry' ? '#ff3355' : '#00f5ff';
+  px(2,8,jacket,5,5);
+  // jacket details
+  px(2,8,accent,1,5); // left stripe
+  px(6,8,accent,1,5); // right stripe
+  px(3,9,'#0f1e2e',2,3); // inner
+
+  // collar
+  px(3,8,accent,1,1); px(5,8,accent,1,1);
+
+  // arms
+  px(1,8,skin,1,3); px(7,8,skin,1,3);
+  // arm accents
+  px(1,10,accent,1,1); px(7,10,accent,1,1);
+
+  // hands
+  px(1,11,skin,1,2); px(7,11,skin,1,2);
+  if (mood==='water') { px(7,11,'#00c8d4',1,2); } // holding water
+  if (mood==='stretch') { px(0,7,accent,1,1); px(8,7,accent,1,1); } // arms up
+
+  // legs
+  const pants = '#050d14';
+  px(2,13,pants,2,3); px(5,13,pants,2,3);
+  px(2,13,accent,1,3); px(6,13,accent,1,3);
+
+  // shoes
+  px(2,15,'#222',2,2); px(5,15,'#222',2,2);
+  px(2,16,accent,2,1); px(5,16,accent,2,1);
+
+  // glow overlay when happy
+  if (mood==='happy' || mood==='water' || mood==='stretch') {
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = eyeColor;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function kairoSay(msg, mood) {
+  kairoMood = mood || 'normal';
+  drawKairo('kairoCanvas', kairoMood);
+  const bubble = document.getElementById('kairoBubble');
+  bubble.textContent = msg;
+  bubble.classList.add('visible');
+  clearTimeout(kairoBubbleTimeout);
+  kairoBubbleTimeout = setTimeout(() => { bubble.classList.remove('visible'); kairoMood='normal'; drawKairo('kairoCanvas','normal'); }, 5000);
+}
+
+function kairoClick() {
+  const t = todayStr();
+  const overdue = tasks.filter(x=>!x.done&&x.date&&x.date<t).length;
+  if (overdue > 0) { kairoSay(`Tienes ${overdue} tarea${overdue>1?'s':''} vencida${overdue>1?'s':''}. Actúa.`, 'angry'); return; }
+  const done = tasks.filter(x=>x.done).length;
+  if (done > 0) { const p = KAIRO_PHRASES.happy; kairoSay(p[Math.floor(Math.random()*p.length)], 'happy'); return; }
+  const p = KAIRO_PHRASES.normal;
+  kairoSay(p[Math.floor(Math.random()*p.length)], 'normal');
+}
+
+function updateKairoMood() {
+  const t = todayStr();
+  const overdue = tasks.filter(x=>!x.done&&x.date&&x.date<t).length;
+  const newMood = overdue > 0 ? 'angry' : 'normal';
+  if (newMood !== kairoMood) { kairoMood = newMood; drawKairo('kairoCanvas', kairoMood); }
+}
+
+// ── WELLNESS ──
+const WELLNESS_KEY = 'kairo-wellness';
+let wellnessType = null;
+let wellnessTimers = [];
+
+function getWellness() {
+  try { return JSON.parse(localStorage.getItem(WELLNESS_KEY)) || { waterInterval:60, stretchTimes:['10:40','16:40'], waterConfirmed:0, stretchConfirmed:{} }; }
+  catch(e) { return { waterInterval:60, stretchTimes:['10:40','16:40'], waterConfirmed:0, stretchConfirmed:{} }; }
+}
+function saveWellness(d) { localStorage.setItem(WELLNESS_KEY, JSON.stringify(d)); }
+
+function showWellnessAlert(type) {
+  wellnessType = type;
+  const d = getWellness();
+  const isWater = type === 'water';
+  document.getElementById('wellnessMsg').innerHTML = isWater
+    ? `<span style="font-size:20px">💧</span><br><br>KAIRO dice:<br><span style="color:var(--cyan)">"${KAIRO_PHRASES.water[Math.floor(Math.random()*KAIRO_PHRASES.water.length)]}"</span><br><br>¿Ya tomaste agua?`
+    : `<span style="font-size:20px">🧘</span><br><br>KAIRO dice:<br><span style="color:var(--cyan)">"${KAIRO_PHRASES.stretch[Math.floor(Math.random()*KAIRO_PHRASES.stretch.length)]}"</span><br><br>¿Completaste el estiramiento?`;
+  drawKairo('wellnessKairo', type);
+  document.getElementById('wellnessPopup').style.display = 'flex';
+  playNotif();
+  if (notifsEnabled && Notification.permission==='granted') {
+    new Notification(isWater ? '💧 Hora del agua' : '🧘 Hora de elongar', { body: isWater ? 'Recuerda hidratarte' : 'Pausa activa — 30 segundos' });
+  }
+}
+
+function confirmWellness() {
+  document.getElementById('wellnessPopup').style.display = 'none';
+  const msg = wellnessType === 'water' ? '¡Hidratación completada! +5 XP' : '¡Elongación completada! +10 XP';
+  const xp = wellnessType === 'water' ? 5 : 10;
+  kairoSay(msg, 'happy'); addXP(xp); playComplete();
+  wellnessType = null;
+}
+
+function snoozeWellness() {
+  document.getElementById('wellnessPopup').style.display = 'none';
+  const type = wellnessType; wellnessType = null;
+  kairoSay('Snooze activado. 10 minutos...', 'normal');
+  setTimeout(() => showWellnessAlert(type), 10 * 60 * 1000);
+}
+
+function openWellnessConfig() {
+  const d = getWellness();
+  const interval = prompt('Recordatorio de agua cada X minutos:', d.waterInterval);
+  if (interval !== null && !isNaN(interval)) d.waterInterval = parseInt(interval);
+  const times = prompt('Horarios de elongar (separados por coma):', d.stretchTimes.join(','));
+  if (times !== null) d.stretchTimes = times.split(',').map(t=>t.trim()).filter(Boolean);
+  saveWellness(d);
+  setupWellnessTimers();
+  toast('// BIENESTAR CONFIG', 'Recordatorios actualizados', 'var(--green)');
+  kairoSay('Configuración guardada. Te cuido.', 'happy');
+}
+
+function setupWellnessTimers() {
+  wellnessTimers.forEach(clearInterval);
+  wellnessTimers = [];
+  const d = getWellness();
+  // water interval
+  wellnessTimers.push(setInterval(() => showWellnessAlert('water'), d.waterInterval * 60 * 1000));
+  // stretch at specific times
+  wellnessTimers.push(setInterval(() => {
+    const now = new Date();
+    const hhmm = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    if (d.stretchTimes.includes(hhmm)) showWellnessAlert('stretch');
+  }, 60 * 1000));
+}
+
+// ── CALENDAR ──
+function openCalendar() {
+  document.getElementById('calPanel').style.display = 'flex';
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  const days = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  const todayStr2 = today.toISOString().split('T')[0];
+
+  grid.innerHTML = Array.from({length:7}, (_,i) => {
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const ds = d.toISOString().split('T')[0];
+    const isToday = ds === todayStr2;
+    const dayTasks = tasks.filter(t => t.date === ds);
+    const tasksHtml = dayTasks.slice(0,4).map(t => {
+      const col = t.priority==='high'?'rgba(255,51,85,0.15)':t.priority==='med'?'rgba(255,170,0,0.15)':'rgba(0,255,136,0.1)';
+      const tcol = t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--green)';
+      return `<div class="cal-task-dot" style="background:${col};color:${tcol};border-left:2px solid ${tcol}">${t.title}</div>`;
+    }).join('') + (dayTasks.length > 4 ? `<div class="cal-task-dot" style="color:var(--text3)">+${dayTasks.length-4} más</div>` : '');
+    return `<div class="cal-day${isToday?' today':''}">
+      <div class="cal-day-header">${days[i]}</div>
+      <div class="cal-day-num">${d.getDate()}</div>
+      ${tasksHtml || '<div style="font-size:9px;color:var(--text3);font-family:\'Share Tech Mono\',monospace">sin tareas</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ── STICKY NOTES ──
+function getStickies() { try { return JSON.parse(localStorage.getItem('kairo-stickies')) || []; } catch(e) { return []; } }
+function saveStickies(s) { localStorage.setItem('kairo-stickies', JSON.stringify(s)); }
+
+function openSticky() {
+  document.getElementById('stickyPanel').style.display = document.getElementById('stickyPanel').style.display === 'none' ? 'block' : 'none';
+  renderStickies();
+}
+
+function renderStickies() {
+  const notes = getStickies();
+  document.getElementById('stickyList').innerHTML = notes.length ? notes.map((n,i) =>
+    `<div class="sticky-note"><span style="flex:1">${n}</span><span class="sticky-del" onclick="deleteSticky(${i})">×</span></div>`
+  ).join('') : '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--text3);padding:8px 0">// sin notas</div>';
+}
+
+function addSticky() {
+  const inp = document.getElementById('stickyInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  const notes = getStickies();
+  notes.unshift(text);
+  saveStickies(notes);
+  inp.value = '';
+  renderStickies();
+}
+
+function deleteSticky(i) {
+  const notes = getStickies();
+  notes.splice(i, 1);
+  saveStickies(notes);
+  renderStickies();
+}
+
+// ── KAIRO MOTIVATIONAL RANDOM ──
+function kairoRandomPhrase() {
+  const t = todayStr();
+  const overdue = tasks.filter(x=>!x.done&&x.date&&x.date<t).length;
+  const mood = overdue > 0 ? 'angry' : 'normal';
+  const pool = KAIRO_PHRASES[mood];
+  kairoSay(pool[Math.floor(Math.random()*pool.length)], mood);
+}
+
+
   if (e.key==='Escape') closeModal();
   if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); openModal(); }
 });
@@ -1442,6 +1958,8 @@ async function init() {
   updateDate();
   setInterval(updateDate, 60000);
   setInterval(checkReminders, 60000);
+  setInterval(updateKairoMood, 30000);
+  setInterval(kairoRandomPhrase, 15 * 60 * 1000);
   notifsEnabled = localStorage.getItem(NOTIF_KEY) === '1';
   updateNotifBtn();
   const fromGist = await gistLoad();
@@ -1449,8 +1967,12 @@ async function init() {
   if (!tasks.length) loadSamples();
   updateSyncIcon('idle');
   renderPomoDots();
+  updateXPBar();
+  checkStreak();
   render();
   setTimeout(checkReminders, 1500);
+  setTimeout(() => { drawKairo('kairoCanvas', 'normal'); kairoSay('Sistema iniciado. ¡Listo para trabajar!', 'happy'); }, 800);
+  setupWellnessTimers();
 }
 
 init();
